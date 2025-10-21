@@ -12,9 +12,9 @@
 
 **Language/Version**: TypeScript（Node 18+）、Vue 3（uni-app + Vite）；Python 3.11（FastAPI）
 **Primary Dependencies**: `@dcloudio/uni-app`、`@dcloudio/vite-plugin-uni`、`vue@3`、`pinia`、`axios`；后端 FastAPI、Pydantic、Uvicorn
-**Storage**: 前端使用 `uni.setStorage`/IndexedDB（草稿与日记索引）；云端 S3（临时图像对象，7 天生命周期策略）；分析服务不保存业务数据
+**Storage**: 前端使用 `uni.setStorage`/IndexedDB（草稿与日记索引）；自建 MinIO（S3 兼容，对象存储，默认 7 天生命周期策略可配置）；PostgreSQL 持久化（日记元数据/可选文本、审计日志与指标）；分析服务严格最小化保留
 **Testing**: 前端 `vitest` + `@vue/test-utils`（单元）、`playwright`（端到端）；后端 `pytest` + 合约测试（OpenAPI）
-**Target Platform**: iOS 15+ 与 Android 10+（uni-app 打包）; H5 开发预览；云端 REST API（API Gateway + Lambda）
+**Target Platform**: iOS 15+ 与 Android 10+（uni-app 打包）; H5 开发预览；自托管服务器（Docker Compose，Nginx 反向代理）
 **Project Type**: frontend + backend
 **Performance Goals**: 首屏/页面可交互 < 2s；分析文本可见 ≤ 15s；后端 p95 响应 < 200ms
 **Constraints**: 离线可用（排队重试）；隐私与短保留（7 天）；可访问性达 WCAG AA

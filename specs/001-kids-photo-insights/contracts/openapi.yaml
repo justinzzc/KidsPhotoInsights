@@ -3,8 +3,8 @@ info:
   title: Kids Photo Insights API
   version: 0.1.0
 servers:
-  - url: https://api.example.com
-    description: Placeholder server
+  - url: http://localhost:8000
+    description: Local development server
 security:
   - ApiKeyAuth: []
 paths:
