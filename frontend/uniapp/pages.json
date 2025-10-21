@@ -1,0 +1,10 @@
+{
+  "pages": [
+    {
+      "path": "pages/capture/index",
+      "style": {
+        "navigationBarTitleText": "拍照记录"
+      }
+    }
+  ]
+}

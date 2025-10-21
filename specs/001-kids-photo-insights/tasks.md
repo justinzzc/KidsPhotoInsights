@@ -1,5 +1,15 @@
 # Tasks: 儿童拍照智能日记（uni-app + FastAPI，自托管）
 
+## 进度（实现门禁视图）
+- [X] 先决条件检查（check-prerequisites.ps1）与 FEATURE_DIR 解析
+- [X] Checklist 门禁通过（requirements.md 全部完成）
+- [X] 创建忽略文件（.gitignore、.dockerignore）
+- [X] 后端 FastAPI 最小骨架（/v1/health、/v1/analyze-photo 占位）
+- [X] 数据库与 MinIO 初始化（启动时优雅跳过未配置）
+- [X] 后端 API 合约测试通过（/v1/health、/v1/analyze-photo）
+- [X] 前端 uni-app 最小结构（H5 选择图片并调用分析接口）
+
+
 本任务清单依据 `spec.md`、`plan.md`、`research.md`、`openapi.yaml` 与 `quickstart.md` 汇总，目标是按 P1→P2→P3 分阶段交付，并满足宪章中的质量与隐私闸门。部署采用 Docker Compose，自托管 MinIO（S3 兼容）与 PostgreSQL。
 
 ## 里程碑与范围
