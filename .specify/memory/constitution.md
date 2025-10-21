@@ -1,50 +1,76 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: N/A → 1.0.0
+- Modified principles: 无
+- Added principles: 代码质量优先; 测试标准严格; 用户体验一致性; 性能与效率要求
+- Added sections: 附加约束与技术标准; 开发流程与质量闸门
+- Removed sections: 删除了模板中的第五原则占位
+- Templates requiring updates:
+  - .specify/templates/plan-template.md ✅ 已对齐（保留“Constitution Check”占位）
+  - .specify/templates/spec-template.md ✅ 已对齐
+  - .specify/templates/tasks-template.md ✅ 已对齐
+- Deferred TODOs: 无
+-->
 
-## Core Principles
+# Spec Kit Test-Spec 宪章
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+## 核心原则（Core Principles）
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### 代码质量优先
+- MUST: 统一编码规范与自动格式化（如 ESLint/Prettier 或语言等价工具）。
+- MUST: 启用静态分析，禁止高危/严重级别告警合入主分支。
+- MUST: 严格代码评审，要求清晰变更描述与合理性论证。
+- SHOULD: 控制复杂性（圈复杂度、文件/函数长度），必要时拆分与重构。
+- Rationale: 高质量代码降低维护成本与缺陷率，支撑长期可持续迭代。
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### 测试标准严格
+- MUST: 单元测试覆盖核心路径，覆盖率目标≥80%（核心模块≥90%）。
+- MUST: Red-Green-Refactor 流程，测试先行；CI 必须先失败后通过。
+- MUST: 合约/接口测试覆盖公共边界；关键交互具备集成测试。
+- SHOULD: 为性能关键模块编写基准测试以监测回归。
+- Rationale: 测试保障质量与可重构性，降低回归风险，提升交付信心。
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### 用户体验一致性
+- MUST: 采用统一设计体系/组件库与设计令牌（颜色、间距、字号）。
+- MUST: 文案与术语风格统一；关键流程交互一致且可预测。
+- MUST: 可访问性至少达 WCAG AA 等级；键盘与屏幕阅读器可用。
+- SHOULD: 跨平台行为保持一致；异常与空态提供清晰指引与恢复路径。
+- Rationale: 一致性降低用户认知负担，提升可学习性与品牌可信度。
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### 性能与效率要求
+- MUST: 为关键路径设定性能预算；后端 p95 响应 < 200ms；前端首屏 < 2s。
+- MUST: 建立监控与指标上报（吞吐、延迟、错误率、资源使用）。
+- MUST: 性能回归检查纳入 CI；PR 若超预算必须优化或拆分。
+- SHOULD: 使用缓存、异步与批处理优化资源利用与吞吐。
+- Rationale: 性能直接影响体验与成本；预算使性能可控、可追踪与可改进。
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## 附加约束与技术标准（Additional Constraints & Standards）
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- 语言/版本：记录并遵循受支持的语言与运行时版本矩阵。
+- 安全：开启依赖漏洞扫描；密钥/凭据集中管理；严格输入校验。
+- 文档：功能、接口与变更需同步文档与示例；变更日志可审计。
+- 版本管理：语义化版本（SemVer）；破坏性变更需迁移说明与双轨发布策略。
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## 开发流程与质量闸门（Workflow & Quality Gates）
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- 阶段：研究 → 设计 → 实现 → 验收/发布。
+- 质量闸门（CI 强制执行）：
+  - 代码质量门：lint 无错误；静态分析无高危；代码评审通过。
+  - 测试门：覆盖率达标；关键集成与合约测试通过；基准测试无回归。
+  - 性能门：性能预算验证通过（后端 p95、前端首屏等指标）。
+  - UX 门：设计令牌一致性、组件库合规与可访问性清单通过。
+- 变更前置条件：闸门未通过的变更不得合入主分支。
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+## 治理（Governance）
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+- 宪章优先：本宪章高于其他实践，发生冲突时以本宪章为准。
+- 修订流程：通过 PR 提出变更，包含变更说明、影响评估与迁移计划；
+  至少需一名技术负责人与一名产品/设计负责人签署批准；通过后更新版本与相关文档。
+- 版本策略（语义化版本）：
+  - MAJOR：不向后兼容的治理/原则变更或移除。
+  - MINOR：新增原则或显著扩展指导。
+  - PATCH：澄清、措辞与非语义改动。
+- 合规审查：至少每季度一次；重大版本发布前需额外审查；CI 持续执行闸门。
+- 可审计性：监控指标、测试报告与评审记录需存档以便追溯。
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-10-21 | **Last Amended**: 2025-10-21
