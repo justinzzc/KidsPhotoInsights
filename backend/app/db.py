@@ -1,6 +1,6 @@
 import os
 import uuid
-from typing import Optional, Any
+from typing import Optional, Any, List, Dict
 
 _pool: Optional[Any] = None
 DATABASE_URL = os.getenv("DATABASE_URL", "")
@@ -62,3 +62,25 @@ async def insert_diary_entry(text: str, mood: Optional[str], weather: Optional[s
             weather,
         )
     return entry_id
+
+
+async def fetch_diary_entries(limit: int = 20) -> List[Dict[str, Any]]:
+    """Fetch latest diary entries; return [] if DB disabled."""
+    if _pool is None:
+        return []
+    async with _pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT id::text AS id, EXTRACT(EPOCH FROM ts) AS ts, text, mood, weather FROM diary_entries ORDER BY ts DESC LIMIT $1",
+            limit,
+        )
+    return [dict(r) for r in rows]
+
+
+async def delete_diary_entry(entry_id: str) -> bool:
+    """Delete diary entry by id; return False if not found or DB disabled."""
+    if _pool is None:
+        return False
+    async with _pool.acquire() as conn:
+        res = await conn.execute("DELETE FROM diary_entries WHERE id = $1", entry_id)
+    # asyncpg returns 'DELETE <count>'
+    return res.startswith("DELETE ") and res.split(" ")[-1] != "0"

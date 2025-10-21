@@ -4,7 +4,7 @@ import base64
 import time
 
 from .config import Settings
-from .schemas import AnalysisResult, Suggestion, SuggestionItem
+from .schemas import AnalysisResult, Suggestion, SuggestionItem, DiaryEntry
 from . import db
 from .services.minio_client import ensure_minio_bucket
 
@@ -37,6 +37,20 @@ class AnalyzeRequest(BaseModel):
 @app.get("/v1/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/v1/diary-entries", response_model=list[DiaryEntry])
+async def list_diaries(_: None = Depends(verify_api_key)):
+    items = await db.fetch_diary_entries(limit=20)
+    return items
+
+
+@app.delete("/v1/diary-entries/{entry_id}", status_code=204)
+async def delete_diary(entry_id: str, _: None = Depends(verify_api_key)):
+    deleted = await db.delete_diary_entry(entry_id)
+    if not deleted:
+        # No content either way for simplicity in MVP; could return 404 later
+        return
 
 
 @app.post("/v1/analyze-photo", response_model=AnalysisResult)

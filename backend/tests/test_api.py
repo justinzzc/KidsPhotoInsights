@@ -21,3 +21,16 @@ def test_analyze_photo():
     assert "childState" in data
     assert "mood" in data
     assert "weather" in data
+
+
+def test_list_diary_entries():
+    r = client.get("/v1/diary-entries")
+    assert r.status_code == 200
+    data = r.json()
+    assert isinstance(data, list)
+
+
+def test_delete_diary_entry():
+    # Delete a random id; should return 204 even if not exists/DB disabled (MVP simplicity)
+    r = client.delete("/v1/diary-entries/00000000-0000-0000-0000-000000000000")
+    assert r.status_code == 204

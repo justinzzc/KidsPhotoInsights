@@ -7,7 +7,9 @@
 - [X] 后端 FastAPI 最小骨架（/v1/health、/v1/analyze-photo 占位）
 - [X] 数据库与 MinIO 初始化（启动时优雅跳过未配置）
 - [X] 后端 API 合约测试通过（/v1/health、/v1/analyze-photo）
+- [X] 后端日记列表与删除接口（/v1/diary-entries、DELETE /v1/diary-entries/{id}）
 - [X] 前端 uni-app 最小结构（H5 选择图片并调用分析接口）
+- [X] 前端草稿保存与日记列表功能（本地存储 + 后端集成）
 
 
 本任务清单依据 `spec.md`、`plan.md`、`research.md`、`openapi.yaml` 与 `quickstart.md` 汇总，目标是按 P1→P2→P3 分阶段交付，并满足宪章中的质量与隐私闸门。部署采用 Docker Compose，自托管 MinIO（S3 兼容）与 PostgreSQL。

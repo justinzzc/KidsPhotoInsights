@@ -19,3 +19,10 @@ class AnalysisResult(BaseModel):
     weather: Optional[str] = None
     tags: List[str] = []
     suggestions: List[Suggestion] = []
+
+class DiaryEntry(BaseModel):
+    id: str
+    ts: float
+    text: Optional[str] = None
+    mood: Optional[str] = None
+    weather: Optional[str] = None
