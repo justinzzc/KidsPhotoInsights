@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,8 +31,8 @@
 
 ## Notes
 
-- Clarifications needed:
-  - Q1（数据处理边界）: [NEEDS CLARIFICATION: 图像分析在本地还是云端进行，及数据保留周期]
-  - Q2（多孩管理）: [NEEDS CLARIFICATION: 是否需要识别并标注具体孩子身份]
+- Clarifications resolved:
+  - Q1（数据处理边界）: 选择 B（云端分析，默认短保留 7 天；本地仅缓存草稿；可配置且可随时删除）
+  - Q2（多孩管理）: 选择 A（不自动识别，由用户手动选择孩子身份）
 
-- After resolution: Update FR-009/FR-010 accordingly and re-run this checklist.
+- Spec updates applied: FR-009 与 FR-010 已更新；当前规格无 [NEEDS CLARIFICATION] 标记。
