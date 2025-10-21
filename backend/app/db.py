@@ -1,20 +1,28 @@
 import os
 import uuid
-from typing import Optional
+from typing import Optional, Any
 
-import asyncpg
-
-_pool: Optional[asyncpg.pool.Pool] = None
+_pool: Optional[Any] = None
 DATABASE_URL = os.getenv("DATABASE_URL", "")
+_asyncpg: Any = None
 
 
 async def init_db() -> None:
-    """Initialize Postgres pool and create minimal tables if configured."""
-    global _pool
+    """Initialize Postgres pool and create minimal tables if configured.
+    Gracefully skip if DATABASE_URL not set or asyncpg missing.
+    """
+    global _pool, _asyncpg
     if not DATABASE_URL:
         # DB disabled in current environment
         return
-    _pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=5)
+    try:
+        import asyncpg as _apg  # lazy import to avoid hard dependency when unused
+        _asyncpg = _apg
+    except ModuleNotFoundError:
+        print("asyncpg not installed; skipping DB init")
+        return
+
+    _pool = await _asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=5)
     async with _pool.acquire() as conn:
         await conn.execute(
             """
