@@ -1,6 +1,10 @@
 import os
 import uuid
 from typing import Optional, Any, List, Dict
+from dotenv import load_dotenv
+
+# 加载 .env 文件
+load_dotenv()
 
 _pool: Optional[Any] = None
 DATABASE_URL = os.getenv("DATABASE_URL", "")
@@ -12,17 +16,25 @@ async def init_db() -> None:
     Gracefully skip if DATABASE_URL not set or asyncpg missing.
     """
     global _pool, _asyncpg
+    print(f"init_db called, DATABASE_URL: {DATABASE_URL}")
     if not DATABASE_URL:
         # DB disabled in current environment
+        print("DATABASE_URL not set, skipping DB init")
         return
     try:
         import asyncpg as _apg  # lazy import to avoid hard dependency when unused
         _asyncpg = _apg
+        print("asyncpg imported successfully")
     except ModuleNotFoundError:
         print("asyncpg not installed; skipping DB init")
         return
 
-    _pool = await _asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=5)
+    try:
+        _pool = await _asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=5)
+        print(f"Database pool created successfully: {_pool}")
+    except Exception as e:
+        print(f"Failed to create database pool: {e}")
+        return
     async with _pool.acquire() as conn:
         await conn.execute(
             """
