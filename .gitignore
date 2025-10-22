@@ -9,6 +9,8 @@ coverage/
 .vscode/
 .idea/
 
+.data/
+
 # Python / FastAPI
 __pycache__/
 *.pyc
