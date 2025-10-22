@@ -83,7 +83,9 @@ const fileToBase64 = (file) => {
 }
 
 // 照片分析
-export const analyzePhoto = async (imageFile, regionHint = null) => {
+// 分析API
+export const analysisAPI = {
+  analyzePhoto: async (imageFile, regionHint = null) => {
   // 开发模式下使用模拟数据
   if (USE_MOCK_API) {
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -122,6 +124,7 @@ export const analyzePhoto = async (imageFile, regionHint = null) => {
   
   const response = await api.post('/analyze-photo', requestData)
   return response.data
+  }
 }
 
 // 日记管理

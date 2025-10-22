@@ -70,6 +70,71 @@ export const useDiaryStore = defineStore('diary', () => {
   /**
    * 创建新日记
    */
+  async function createDiary(diaryData: any): Promise<DiaryEntry | null> {
+    isLoading.value = true
+    error.value = null
+    
+    try {
+      // 先创建本地条目
+      const localEntry: DiaryEntry = {
+        id: `diary_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        ts: Date.now() / 1000,
+        title: diaryData.title || '新日记',
+        content: diaryData.content || diaryData.text || '',
+        text: diaryData.content || diaryData.text || '',
+        mood: diaryData.mood,
+        weather: diaryData.weather,
+        image_url: diaryData.image_url,
+        scene: diaryData.scene,
+        suggestion: diaryData.suggestion || diaryData.suggestions,
+        created_at: diaryData.created_at || new Date().toISOString(),
+        status: diaryData.status || 'published'
+      }
+      
+      // 添加到本地列表
+      diaries.value.unshift(localEntry)
+      StorageService.addDiaryEntry(localEntry)
+      
+      // 尝试同步到服务器
+      try {
+        const response = await diaryAPI.create({
+          title: localEntry.title,
+          content: localEntry.content,
+          mood: localEntry.mood,
+          weather: localEntry.weather,
+          image_url: localEntry.image_url,
+          scene: localEntry.scene,
+          suggestion: localEntry.suggestion
+        })
+        
+        if (response.success && response.data) {
+          // 更新为服务器返回的数据
+          const serverEntry = { ...response.data, status: 'published' as const }
+          const index = diaries.value.findIndex(d => d.id === localEntry.id)
+          if (index >= 0) {
+            diaries.value[index] = serverEntry
+            StorageService.addDiaryEntry(serverEntry)
+          }
+          return serverEntry
+        }
+      } catch (serverError) {
+        console.warn('Failed to sync to server:', serverError)
+        // 即使服务器同步失败，本地保存仍然有效
+      }
+      
+      return localEntry
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '创建日记失败'
+      console.error('Failed to create diary:', err)
+      return null
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
+   * 创建新日记
+   */
   async function createDiaryEntry(diaryData: DiaryCreateRequest): Promise<DiaryEntry | null> {
     isLoading.value = true
     error.value = null
@@ -328,6 +393,7 @@ export const useDiaryStore = defineStore('diary', () => {
     
     // 方法
     loadDiaries,
+    createDiary,
     createDiaryEntry,
     updateDiaryEntry,
     removeDiary,

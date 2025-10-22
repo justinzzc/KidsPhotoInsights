@@ -58,10 +58,17 @@
     <div v-if="analysisResult" class="mt-4 p-4 bg-green-50 rounded-lg">
       <h3 class="font-medium text-green-800 mb-2">分析结果</h3>
       <div class="text-green-700 space-y-1">
-        <p><strong>场景：</strong>{{ analysisResult.scene }}</p>
-        <p><strong>天气：</strong>{{ analysisResult.weather }}</p>
+        <p><strong>状态：</strong>{{ analysisResult.childState }}</p>
         <p><strong>心情：</strong>{{ analysisResult.mood }}</p>
-        <p><strong>建议：</strong>{{ analysisResult.suggestion }}</p>
+        <p><strong>天气：</strong>{{ analysisResult.weather }}</p>
+        <div v-if="analysisResult.suggestions && analysisResult.suggestions.length > 0">
+          <p><strong>建议：</strong></p>
+          <ul class="list-disc list-inside ml-4">
+            <li v-for="suggestion in analysisResult.suggestions" :key="suggestion.id">
+              {{ suggestion.reasoning }}
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
 
@@ -73,9 +80,10 @@
 
 <script setup>
 import { ref } from 'vue'
-import { analyzePhoto } from '@/services/api'
+import { analysisAPI } from '@/services/api'
+import { UploadService } from '@/services/upload'
 
-const emit = defineEmits(['analysis-complete'])
+const emit = defineEmits(['analysis-complete', 'image-selected'])
 
 const fileInput = ref(null)
 const selectedFile = ref(null)
@@ -84,6 +92,7 @@ const isDragging = ref(false)
 const isAnalyzing = ref(false)
 const analysisResult = ref(null)
 const error = ref(null)
+const base64Data = ref(null)
 
 const triggerFileInput = () => {
   fileInput.value?.click()
@@ -104,7 +113,7 @@ const handleDrop = (event) => {
   }
 }
 
-const processFile = (file) => {
+const processFile = async (file) => {
   if (file.size > 5 * 1024 * 1024) {
     error.value = '文件大小不能超过 5MB'
     return
@@ -121,8 +130,31 @@ const processFile = (file) => {
   }
   reader.readAsDataURL(file)
 
-  // 自动分析照片
-  analyzePhotoFile(file)
+  // 转换为Base64并分析
+  try {
+    const uploadResult = await UploadService.fileToBase64(file, {
+      quality: 0.8,
+      maxWidth: 1920,
+      maxHeight: 1080
+    })
+
+    if (uploadResult.success) {
+      base64Data.value = uploadResult.data.base64
+      emit('image-selected', {
+        file,
+        base64: uploadResult.data.base64,
+        preview: previewImage.value
+      })
+      
+      // 自动分析照片
+      await analyzePhotoFile(uploadResult.data.base64)
+    } else {
+      error.value = uploadResult.error || '图片处理失败'
+    }
+  } catch (err) {
+    error.value = '图片处理失败，请重试'
+    console.error('Image processing error:', err)
+  }
 }
 
 const removeImage = () => {
@@ -130,19 +162,30 @@ const removeImage = () => {
   previewImage.value = null
   analysisResult.value = null
   error.value = null
+  base64Data.value = null
   fileInput.value.value = ''
+  
+  emit('image-selected', null)
 }
 
-const analyzePhotoFile = async (file) => {
-  if (!file) return
+const analyzePhotoFile = async (base64) => {
+  if (!base64) return
 
   isAnalyzing.value = true
   error.value = null
 
   try {
-    const result = await analyzePhoto(file)
-    analysisResult.value = result
-    emit('analysis-complete', result)
+    const result = await analysisAPI.analyzePhoto({
+      image: base64,
+      regionHint: 'China'
+    })
+    
+    if (result.success) {
+      analysisResult.value = result.data
+      emit('analysis-complete', result.data)
+    } else {
+      error.value = result.error || '分析失败，请重试'
+    }
   } catch (err) {
     error.value = err.message || '分析失败，请重试'
     console.error('Photo analysis error:', err)
@@ -150,4 +193,11 @@ const analyzePhotoFile = async (file) => {
     isAnalyzing.value = false
   }
 }
+
+// 暴露方法给父组件
+defineExpose({
+  getBase64Data: () => base64Data.value,
+  getAnalysisResult: () => analysisResult.value,
+  removeImage
+})
 </script>
