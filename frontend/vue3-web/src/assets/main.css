@@ -1,7 +1,4 @@
-/* Tailwind CSS 指令暂时注释掉，先使用基础样式 */
-/* @tailwind base;
-@tailwind components;
-@tailwind utilities; */
+@import "tailwindcss";
 
 /* 基础样式 */
 * {
