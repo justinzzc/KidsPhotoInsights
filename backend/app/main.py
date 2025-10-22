@@ -2,9 +2,11 @@ from fastapi import FastAPI, Depends, Header, HTTPException
 from pydantic import BaseModel
 import base64
 import time
+import uuid
+from datetime import datetime
 
 from .config import Settings
-from .schemas import AnalysisResult, Suggestion, SuggestionItem, DiaryEntry
+from .schemas import AnalysisResult, Suggestion, SuggestionItem, DiaryEntry, DiaryCreateRequest, AnalyzeRequest
 from . import db
 from .services.minio_client import ensure_minio_bucket
 
@@ -43,6 +45,42 @@ async def health():
 async def list_diaries(_: None = Depends(verify_api_key)):
     items = await db.fetch_diary_entries(limit=20)
     return items
+
+
+@app.post("/v1/diary-entries", response_model=DiaryEntry)
+async def create_diary(req: DiaryCreateRequest, _: None = Depends(verify_api_key)):
+    """创建新的日记条目"""
+    # 生成唯一ID和时间戳
+    entry_id = str(uuid.uuid4())
+    ts = time.time()
+    
+    # 创建日记条目
+    diary_entry = DiaryEntry(
+        id=entry_id,
+        ts=ts,
+        title=req.title,
+        content=req.content,
+        text=req.content,  # 保持向后兼容
+        mood=req.mood,
+        weather=req.weather,
+        image_url=req.image_url,
+        scene=req.scene,
+        suggestion=req.suggestion
+    )
+    
+    try:
+        # 保存到数据库
+        await db.insert_diary_entry(
+            text=req.content or req.title or "",
+            mood=req.mood,
+            weather=req.weather,
+            ts_seconds=ts
+        )
+    except Exception as e:
+        print(f"Database save error: {e}")
+        # 即使数据库保存失败，也返回创建的对象（用于开发测试）
+    
+    return diary_entry
 
 
 @app.delete("/v1/diary-entries/{entry_id}", status_code=204)

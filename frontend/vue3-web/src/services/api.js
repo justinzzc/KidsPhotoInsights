@@ -45,6 +45,33 @@ api.interceptors.response.use(
   }
 )
 
+// 时间格式转换工具函数
+const formatTimestamp = (timestamp) => {
+  if (typeof timestamp === 'string') {
+    // 如果已经是ISO格式，直接返回
+    return timestamp
+  }
+  if (typeof timestamp === 'number') {
+    // Unix时间戳转ISO格式
+    return new Date(timestamp * 1000).toISOString()
+  }
+  // 默认返回当前时间的ISO格式
+  return new Date().toISOString()
+}
+
+const parseTimestamp = (timestamp) => {
+  if (typeof timestamp === 'string') {
+    // ISO格式转Unix时间戳
+    return Math.floor(new Date(timestamp).getTime() / 1000)
+  }
+  if (typeof timestamp === 'number') {
+    // 已经是Unix时间戳
+    return timestamp
+  }
+  // 默认返回当前Unix时间戳
+  return Math.floor(Date.now() / 1000)
+}
+
 // 将图片文件转换为base64格式
 const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -56,7 +83,7 @@ const fileToBase64 = (file) => {
 }
 
 // 照片分析
-export const analyzePhoto = async (imageFile) => {
+export const analyzePhoto = async (imageFile, regionHint = null) => {
   // 开发模式下使用模拟数据
   if (USE_MOCK_API) {
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -83,10 +110,17 @@ export const analyzePhoto = async (imageFile) => {
   // 将图片文件转换为base64
   const imageBase64 = await fileToBase64(imageFile)
   
-  const response = await api.post('/analyze-photo', {
+  const requestData = {
     imageBase64: imageBase64,
     timestamp: Date.now() / 1000
-  })
+  }
+  
+  // 添加regionHint参数支持
+  if (regionHint) {
+    requestData.regionHint = regionHint
+  }
+  
+  const response = await api.post('/analyze-photo', requestData)
   return response.data
 }
 
@@ -101,22 +135,38 @@ export const diaryAPI = {
         {
           id: '1',
           ts: 1705310400,
+          title: '愉快的一天',
+          content: '孩子状态: 活跃；心情: 愉快；天气: 晴',
           text: '孩子状态: 活跃；心情: 愉快；天气: 晴',
+          created_at: formatTimestamp(1705310400),
           mood: '愉快',
-          weather: '晴'
+          weather: '晴',
+          image_url: null,
+          scene: '户外',
+          suggestion: null
         },
         {
           id: '2',
           ts: 1705224000,
+          title: '好奇的探索',
+          content: '孩子状态: 安静；心情: 好奇；天气: 雨',
           text: '孩子状态: 安静；心情: 好奇；天气: 雨',
+          created_at: formatTimestamp(1705224000),
           mood: '好奇',
-          weather: '雨'
+          weather: '雨',
+          image_url: null,
+          scene: '室内',
+          suggestion: null
         }
       ]
     }
     
     const response = await api.get('/diary-entries')
-    return response.data
+    // 确保返回的数据包含统一的时间格式
+    return response.data.map(entry => ({
+      ...entry,
+      created_at: entry.created_at || formatTimestamp(entry.ts)
+    }))
   },
 
   // 创建日记
@@ -124,11 +174,14 @@ export const diaryAPI = {
     // 开发模式下使用模拟数据
     if (USE_MOCK_API) {
       await new Promise(resolve => setTimeout(resolve, 800))
+      const now = Date.now() / 1000
       return {
         id: Date.now().toString(),
+        ts: now,
         title: diaryData.title,
         content: diaryData.content,
-        created_at: new Date().toISOString(),
+        text: diaryData.content, // 保持向后兼容
+        created_at: formatTimestamp(now),
         weather: diaryData.weather || '晴',
         mood: diaryData.mood || '愉快',
         image_url: diaryData.image_url || null,
@@ -138,7 +191,12 @@ export const diaryAPI = {
     }
     
     const response = await api.post('/diary-entries', diaryData)
-    return response.data
+    const entry = response.data
+    // 确保返回的数据包含统一的时间格式
+    return {
+      ...entry,
+      created_at: entry.created_at || formatTimestamp(entry.ts)
+    }
   },
 
   // 删除日记

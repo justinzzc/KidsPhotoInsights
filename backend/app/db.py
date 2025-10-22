@@ -66,6 +66,7 @@ async def insert_diary_entry(text: str, mood: Optional[str], weather: Optional[s
 
 async def fetch_diary_entries(limit: int = 20) -> List[Dict[str, Any]]:
     """Fetch latest diary entries; return [] if DB disabled."""
+    print("fetch_diary_entries:", limit ,_pool)
     if _pool is None:
         return []
     async with _pool.acquire() as conn:
@@ -73,6 +74,8 @@ async def fetch_diary_entries(limit: int = 20) -> List[Dict[str, Any]]:
             "SELECT id::text AS id, EXTRACT(EPOCH FROM ts) AS ts, text, mood, weather FROM diary_entries ORDER BY ts DESC LIMIT $1",
             limit,
         )
+    """日志输出"""
+    print("fetch_diary_entries:", rows)
     return [dict(r) for r in rows]
 
 
