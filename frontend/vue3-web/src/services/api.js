@@ -119,6 +119,28 @@ export const diaryAPI = {
     return response.data
   },
 
+  // 创建日记
+  create: async (diaryData) => {
+    // 开发模式下使用模拟数据
+    if (USE_MOCK_API) {
+      await new Promise(resolve => setTimeout(resolve, 800))
+      return {
+        id: Date.now().toString(),
+        title: diaryData.title,
+        content: diaryData.content,
+        created_at: new Date().toISOString(),
+        weather: diaryData.weather || '晴',
+        mood: diaryData.mood || '愉快',
+        image_url: diaryData.image_url || null,
+        scene: diaryData.scene || null,
+        suggestion: diaryData.suggestion || null
+      }
+    }
+    
+    const response = await api.post('/diary-entries', diaryData)
+    return response.data
+  },
+
   // 删除日记
   delete: async (id) => {
     // 开发模式下使用模拟数据
